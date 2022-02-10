@@ -1,0 +1,91 @@
+from PyQt5.QtWidgets import QApplication,QWidget, QVBoxLayout, QHBoxLayout,QPushButton,QListWidget,QLabel, QFileDialog
+import os
+app = QApplication([])
+window = QWidget()
+window.resize(600,400)
+window.setWindowTitle('Easy Editor')
+
+line1 = QVBoxLayout()
+line2 = QVBoxLayout()
+line3 =QHBoxLayout()
+General_line = QHBoxLayout()
+
+btn_left = QPushButton('Лево')
+btn_right = QPushButton('Право')
+btn_mirror = QPushButton('Зеркало')
+btn_contrast = QPushButton('Резкость')
+btn_black = QPushButton('Ч/Б')
+btn_folder = QPushButton('Папка')
+
+pic = QLabel('Картинка=)')
+
+List = QListWidget()
+
+line3.addWidget(btn_left)
+line3.addWidget(btn_right)
+line3.addWidget(btn_mirror)
+line3.addWidget(btn_contrast)
+line3.addWidget(btn_black)
+line1.addWidget(btn_folder)
+line1.addWidget(List)
+
+line2.addWidget(pic)
+line2.addLayout(line3)
+General_line.addLayout(line1)
+General_line.addLayout(line2)
+
+window.setLayout(General_line)
+
+workdir = ''
+
+
+
+def filter(files, extencions):
+    result = []
+    for filename in files:
+        for ext in extencions:
+            if filename.endswith(ext):
+                result.append(filename)
+    return result
+def chooseWorkdir():
+    global workdir
+    workdir = QFileDialog.getExistingDirectory()
+
+def showfilenamelist():
+    extencions=['.jpg','.png','.bmp']
+    chooseWorkdir()
+    filenames=filter(os.listdir(workdir), extencions)
+
+
+
+btn_folder.clicked.connect(showfilenamelist)
+
+
+class ImageProcessor():
+    def __init__ (self):
+        self.image = None
+        self.dir = None
+        self.filename = None
+        self.save_dir = 'Modified/'
+    def load_image(self, dir, filename):
+        self.dir = dir
+        self.filename = filename
+        image_path = os.path.join(dir,filename)
+        self.image = Image.open(image_path)
+    def show_image(self, path):
+        pic.hide()
+        pixmapimage = pixmapimage.scaled(w, h, Qt.KeepAspectRatio)
+        pic.setPixmap(pixmapimage)
+        pic.show()
+
+workimage = ImageProcessor()
+def showChoosenImage():
+    if List.currentRow()>=0:
+        filename = List.currentItm().text()
+        workimage.load_image(workdir, filename)
+        image_path = os.path.join(workimage.dir,workimage.filename)
+        workimage.show_image(image_path)
+
+List.currentRowChanged.connect(showChoosenImage)
+window.show()
+app.exec_()
